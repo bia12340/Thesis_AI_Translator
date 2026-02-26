@@ -42,7 +42,7 @@ def get_translation_model(source_lang, target_lang):
 
 @app.get("/")
 def home():
-    return {"status": "Thesis API is ONLINE", "model": "Whisper Tiny"}
+    return {"status": "Translator API is ONLINE & SYNCED", "model": "Whisper Tiny"}
 
 @app.post("/process")
 async def process_audio(
