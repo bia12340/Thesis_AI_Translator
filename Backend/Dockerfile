@@ -1,23 +1,24 @@
-# Folosim o versiune ușoară de Python
+# Use an official lightweight Python image
 FROM python:3.10-slim
 
-# Instalăm dependențele de sistem pentru audio și FFmpeg (esențial pentru Whisper și Edge-TTS)
+# Install system dependencies for audio processing
+# ffmpeg is essential for Whisper (STT) and Edge-TTS to function correctly
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Setăm folderul de lucru în server
+# Set the working directory inside the container
 WORKDIR /code
 
-# Copiem requirements.txt și instalăm librăriile
+# Copy the requirements file and install Python dependencies
 COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-# Copiem restul fișierelor (app.py) din folderul local în folderul /code din server
+# Copy all project files from the local directory to the /code directory in the container
 COPY . .
 
-# Expunem portul pe care rulează FastAPI
+# Expose the port that FastAPI will run on
 EXPOSE 7860
 
-# Pornim serverul folosind uvicorn
+# Start the server using uvicorn
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
