@@ -16,4 +16,4 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push --force https://Bia12340:$HF_TOKEN@huggingface.co/spaces/Bia12340/Thesis_AI_Translator main
+        run: git push --force https://Bia12340:$HF_TOKEN@huggingface.co/spaces/Bia12340/translator-backend main
