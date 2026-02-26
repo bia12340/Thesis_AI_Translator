@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Translator Licență</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px; background: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        button { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-size: 16px; margin: 10px; transition: 0.3s; }
+        button:disabled { background: #ccc; }
+        button.recording { background: #dc3545; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .result { margin-top: 20px; text-align: left; padding: 10px; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Translator AI</h2>
+    <p>Apasă butonul și vorbește în Engleză</p>
+    
+    <button id="recordBtn">Start Înregistrare</button>
+    
+    <div id="status">Gata de lucru.</div>
+
+    <div class="result" id="resultArea" style="display:none;">
+        <p><strong>Original:</strong> <span id="origText">...</span></p>
+        <p><strong>Traducere:</strong> <span id="transText">...</span></p>
+    </div>
+</div>
+
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    const recordBtn = document.getElementById('recordBtn');
+    const status = document.getElementById('status');
+
+    recordBtn.onclick = async () => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+            recordBtn.innerText = "Procesare...";
+            recordBtn.classList.remove('recording');
+            recordBtn.disabled = true;
+        } else {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+            
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                await sendToBackend(audioBlob);
+            };
+
+            mediaRecorder.start();
+            recordBtn.innerText = "Stop (Vorbește acum)";
+            recordBtn.classList.add('recording');
+            status.innerText = "Te ascult...";
+        }
+    };
+
+    async function sendToBackend(blob) {
+        const formData = new FormData();
+        formData.append("audio", blob, "audio.wav");
+        formData.append("target_lang", "ro");
+        formData.append("session_id", "web_user");
+
+        try {
+            const response = await fetch("https://bia12340-translator-backend.hf.space", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+            
+            document.getElementById('resultArea').style.display = "block";
+            document.getElementById('origText').innerText = data.source_text;
+            document.getElementById('transText').innerText = data.translated_text;
+            
+            status.innerText = "Traducere reușită!";
+        } catch (error) {
+            console.error(error);
+            status.innerText = "Eroare la conectarea cu serverul.";
+        } finally {
+            recordBtn.innerText = "Start Înregistrare";
+            recordBtn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
