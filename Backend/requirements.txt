@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-python-multipart
-faster-whisper
-transformers
-torch
-edge-tts
-sentencepiece
