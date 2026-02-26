@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+faster-whisper
+marisa-trie
+torch
+torchaudio
+transformers
+sentencepiece
+edge-tts
